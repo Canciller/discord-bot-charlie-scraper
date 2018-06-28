@@ -1,0 +1,84 @@
+#!/bin/python
+
+import sys
+import re
+
+from urllib.request import Request, urlopen
+
+url='http://www.listademaestros.com/fime/maestro/'
+
+def getUrl(url):
+    request = Request(url, headers={'User-Agent': 'Mozilla/5.0'}) 
+    return urlopen(request).read().decode('utf-8')
+
+def createObject(data):
+    obj = {
+        'name' : '',
+        'scores' : [],
+        'votes' : [0, 0],
+    }
+    
+    regex = r'<div id="ribbon_r.*<h1>\s*(.+)<\/h1'
+    
+    match = re.search(regex, data, flags=re.DOTALL)
+    if not match: return None
+    
+    obj['name'] = match.groups()[0]
+    
+    regex = r'<li id="&&&&&(?:\D|\s)*(\d+(?:\.\d+)?)(?:\D|\s)*p>\s*(\w+)<'
+    f = regex.find('&')
+    
+    ids = ['ex_li', 'ac_li', 'pa_li', 'as_li', 'se_li']
+    for i in ids:
+        regex = regex[:f] + i + regex[f + 5:] 
+        
+        match = re.search(regex, data)
+        if not match: return None
+        
+        groups = match.groups()
+        obj['scores'].append({'name':groups[1], 'value':groups[0]})
+    
+    regex = r'<div id="extra_s(?:\S|\s)*&&&&&(?:\D\s)*<span>(?:\D\s)*(\d+)'
+    f = regex.find('&')
+    
+    ids = ['Chido', 'Gacho']
+    for i in range(0, 2):
+        regex = regex[:f] + ids[i] + regex[f + 5:]
+
+        match = re.search(regex, data)
+        if not match: return None
+        
+        obj['votes'][i] = int(match.groups()[0]) 
+
+    return obj
+
+def main():
+    lenArgs = len(sys.argv)
+    if lenArgs > 3 or lenArgs < 1: 
+        print("usage")
+        return 1
+    else if lenArgs == 3:
+
+    else if lenArgs == 2:
+    
+    outFile
+    rng = [1, sys.maxsize]
+    tolerance = 5
+    
+    objects = []
+    
+    tolCount = 0
+    for i in range(rng[0], rng[1] + 1):
+        try:
+            if tolCount == tolerance: break
+            obj = createObject(getUrl(url + str(i)))
+            if obj: objects.append(obj)
+            else: tolCount = tolCount + 1
+        except:
+            print('error!')
+            continue
+    if objects:
+        print(objects)
+
+if __name__ == '__main__':
+    main()
