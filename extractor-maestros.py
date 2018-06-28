@@ -71,19 +71,19 @@ def main():
         exit(1)
     
     maestros = []     
-    urlBase='http://www.listademaestros.com/fime/maestro/'
+    url='http://www.listademaestros.com/fime/maestro/'
     
     tolCount = 0
     for i in range(rng[0], rng[1] + 1):
         try:
             if tolCount == tolerance: break
-            url = urlBase + str(i)
-            maestro = getMaestro(getUrl(url))
+            maestro = getMaestro(getUrl(url + str(i))
             if maestro:
                 maestro["id"] = i
                 maestros.append(maestro)
                 tolCount = 0
-            else: tolCount = tolCount + 1
+            else: 
+                tolCount = tolCount + 1
             print(maestro)
             print('[info] done (', i, '/', rng[1], ')')
             print('[info] tolerance(max ', tolerance,'): ', tolCount, '\n', sep='') 
