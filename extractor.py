@@ -5,8 +5,6 @@ import json
 
 from urllib.request import Request, urlopen
 
-urlBase='http://www.listademaestros.com/fime/maestro/'
-
 def getUrl(url):
     request = Request(url, headers={'User-Agent': 'Mozilla/5.0'}) 
     return urlopen(request).read().decode('utf-8')
@@ -71,8 +69,10 @@ def main():
     if rng[0] > rng[1] or rng[0] < 1 or rng[1] < 1:
         print('[error] invalid range')
         exit(1)
-    maestros = []
-     
+    
+    maestros = []     
+    urlBase='http://www.listademaestros.com/fime/maestro/'
+    
     tolCount = 0
     for i in range(rng[0], rng[1] + 1):
         try:
