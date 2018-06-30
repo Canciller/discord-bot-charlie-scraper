@@ -3,6 +3,7 @@ import os.path
 import re
 import json
 
+from pprint import PrettyPrinter
 from urllib.request import Request, urlopen
 
 def getUrl(url):
@@ -11,22 +12,22 @@ def getUrl(url):
 
 def getMaestro(data):
     
-    regex = r'n_r[\S\s]+<h1>\s*(\w+[\s\w\.]*)'
-    
+    regex_template = r'n_r[\S\s]+<h1>\s*(\w+[\s\w\.]*)'
+    regex = regex_template
     match = re.search(regex, data)
+     
     if not match: return None
     
     name = match.groups()[0]
     
     offsets = ['ex_li', 'ac_li', 'pa_li', 'as_li', 'se_li']
 
-    regex = r'<li\s+id="#####">\s*(\d+(?:\.\d+)?)'
-    index = regex.find('#')
+    regex_template = r'<li\s+id="{}">\s*(\d+(?:\.\d+)?)'
 
     scores = []
 
-    for i in offsets:
-        regex = regex[:index] + i + regex[index + len(offsets[0]):]
+    for offt in offsets:
+        regex = regex_template.format(offt)
         match = re.search(regex, data)
         if not match: return None
         
@@ -34,14 +35,12 @@ def getMaestro(data):
      
     offsets = ['Chido', 'Gacho']
 
-    regex = r'#####:\s*<span>\s*(\d+)'
-    index = regex.find('#')
+    regex_template = r'{}:\s*<span>\s*(\d+)'
 
     votes = []
 
-    for i in offsets:
-        regex = regex[:index] + i + regex[index + len(offsets[0]):]
-
+    for offt in offsets:
+        regex = regex_template.format(offt)
         match = re.search(regex, data)
         if not match: return None
         
@@ -70,30 +69,37 @@ def main():
         print('[error] invalid range')
         exit(1)
     
+    pp = PrettyPrinter(indent = 4)
+
     maestros = []     
-    url='http://www.listademaestros.com/fime/maestro/'
-    
+    urlBase = 'http://www.listademaestros.com/fime/maestro/'
+
     tolCount = 0
     for i in range(rng[0], rng[1] + 1):
         try:
             if tolCount == tolerance: break
-            maestro = getMaestro(getUrl(url + str(i))
+            url = urlBase + str(i)
+            print('[info] getting {}\n'.format(url)) 
+            maestro = getMaestro(getUrl(url))
             if maestro:
                 maestro["id"] = i
                 maestros.append(maestro)
                 tolCount = 0
             else: 
                 tolCount = tolCount + 1
-            print(maestro)
-            print('[info] done (', i, '/', rng[1], ')')
-            print('[info] tolerance(max ', tolerance,'): ', tolCount, '\n', sep='') 
-        except KeyboardInterrupt: break
+            pp.pprint(maestro)
+            print('\n[info] done {} ({},{})'.format(url, i, rng[1]))
+            print('[info] tolerance(max {}): {}\n'.format(tolerance, tolCount))
+        except KeyboardInterrupt: 
+            print('\n[info] user cancelled extraction process')
+            break
         except Exception as e:
             print('[error]', e)
             continue
     if maestros:
         with open(sys.argv[1]+'.json', 'w') as f:
-            json.dump(maestros, f)
+            json.dump(maestros, f, indent=4)
+            print('[info] writing to file: {}'.format(sys.argv[1]+'.json'))
     else: exit(1)
 
 if __name__ == '__main__':
