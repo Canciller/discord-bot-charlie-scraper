@@ -20,33 +20,40 @@ def getMaestro(data):
     
     name = match.groups()[0]
     
-    offsets = ['ex_li', 'ac_li', 'pa_li', 'as_li', 'se_li']
+    offsets = [
+        ['ex_li', 'explicacion' ], 
+        ['ac_li', 'accesible' ], 
+        ['pa_li', 'pasable' ],
+        ['as_li', 'asistencia' ], 
+        ['se_li', 'sexy' ]
+    ]
 
     regex_template = r'<li\s+id="{}">\s*(\d+(?:\.\d+)?)'
 
-    scores = []
+    scores = {}
 
     for offt in offsets:
-        regex = regex_template.format(offt)
+        regex = regex_template.format(offt[0])
         match = re.search(regex, data)
         if not match: return None
         
-        scores.append(float(match.groups()[0]))
+        scores[offt[1]] = float(match.groups()[0])
      
-    offsets = ['Chido', 'Gacho']
+    offsets = [ ['Chido', 'up'], ['Gacho', 'down']]
 
     regex_template = r'{}:\s*<span>\s*(\d+)'
 
-    votes = []
+    votes = {}
 
     for offt in offsets:
-        regex = regex_template.format(offt)
+        regex = regex_template.format(offt[0])
         match = re.search(regex, data)
         if not match: return None
         
-        votes.append(int(match.groups()[0])) 
+        votes[offt[1]] = int(match.groups()[0])
 
     maestro = { 'name' : name, 'scores' : scores, 'votes' : votes }
+    
     return maestro
 
 def main():
@@ -71,7 +78,7 @@ def main():
     
     pp = PrettyPrinter(indent = 4)
 
-    maestros = []     
+    maestros = { "maestros" : [] }     
     urlBase = 'http://www.listademaestros.com/fime/maestro/'
 
     tolCount = 0
@@ -83,7 +90,7 @@ def main():
             maestro = getMaestro(getUrl(url))
             if maestro:
                 maestro["id"] = i
-                maestros.append(maestro)
+                maestros["maestros"].append(maestro)
                 tolCount = 0
             else: 
                 tolCount = tolCount + 1
@@ -94,11 +101,13 @@ def main():
             print('\n[info] user cancelled extraction process')
             break
         except Exception as e:
-            print('[error]', e)
+            tolCount = tolCount + 1 
+            print('[error]', e) 
+            print('[info] tolerance(max {}): {}\n'.format(tolerance, tolCount))
             continue
     if maestros:
         with open(sys.argv[1]+'.json', 'w') as f:
-            json.dump(maestros, f, indent=4)
+            json.dump(maestros, f)
             print('[info] writing to file: {}'.format(sys.argv[1]+'.json'))
     else: exit(1)
 
