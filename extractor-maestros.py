@@ -78,7 +78,7 @@ def main():
     
     pp = PrettyPrinter(indent = 4)
 
-    maestros = { "maestros" : [] }     
+    maestros = []
     urlBase = 'http://www.listademaestros.com/fime/maestro/'
 
     tolCount = 0
@@ -90,7 +90,7 @@ def main():
             maestro = getMaestro(getUrl(url))
             if maestro:
                 maestro["id"] = i
-                maestros["maestros"].append(maestro)
+                maestros.append(maestro)
                 tolCount = 0
             else: 
                 tolCount = tolCount + 1
