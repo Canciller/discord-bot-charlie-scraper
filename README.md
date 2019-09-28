@@ -1,1 +1,1 @@
-# discord-bot-charlie-scraper
+# discord-bot-yegua-scraper
